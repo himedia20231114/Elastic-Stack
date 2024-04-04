@@ -1,7 +1,7 @@
 이벤트 뷰어 
   eventvwr.msc
 
-// Elastic Stack 설치 7.10.1,   8.1.3 (최신 버젼) 
+// Elastic Stack 설치 7.10.1,   8.13.1 (최신 버젼) 
   
    https://www.elastic.co/    <== 공식 사이트 
    https://www.elastic.co/kr/downloads   <== 모든 제품, 모든 버젼 다운로드 
@@ -22,7 +22,7 @@
 	C:\elasticsearch7>.\bin\elasticsearch.bat		<== 창은 종료하면 안됨
 
 	// 명령 프롬프트 창을 하나더 띄운 다음 실행 : 
-	curl -X GET "localhost:9200/?pretty"
+	C:\elasticsearch7>curl -X GET "localhost:9200/?pretty"
 
 =========아래 내용 잘 출력 되면 정상 작동 ========================
 {
@@ -55,11 +55,122 @@
 	//Elastic 에서 제공 해주는 Sample Data Import 
 	Home => Try our sample data (클릭) 
 
+=============================================================================================================================
+  2. Linux (Ubuntu 22.04)   		<== 운영 환경   ( ELK-Stack 8.13.1 )
+	https://www.elastic.co/guide/en/elasticsearch/reference/8.13/deb.html	//공식 사이트 : Debian 계열 Linux : Debian, Ubuntu, Kali .... 
+		apt, apt-get 을 사용 해서 설치 
+
+     ELK-Stack1         192.168.15.40	매핑포트(포트포워딩) : 22040
+
+     //컴퓨터 이름변경 : sudo cat /etc/hostname 			sudo vi /etc/hostname
+     // IP 변경        : sudo cat /etc/netplan/00-installer-config.yaml	sudo vi /etc/netplan/00-installer-config.yaml
+     // 리부팅         : sudo reboot       or    sudo init 6
 
 
- 
-  2. Linux (Ubuntu 22.04)   <== 운영 환경   ( 8.13 )
-  3. Linux Docker 		<== 운영 환경   ( 8.13 ) 
+
+// ElasticSearch 설치 
+     2-1 Import the Elasticsearch PGP Key : 설치를 위한 키등록 
+	wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+
+     2-2 Installing from the APT repository :  Elastic 가 저장된 레파지토리 등록
+	apt update
+	sudo apt-get install apt-transport-https
+	echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list
+
+     2-3 Elastic Search 설치 
+	sudo apt-get update && sudo apt-get install elasticsearch
+
+        <중요> 출력 내용 확인 : elastic  <== ID,  password 적어두어야함. 
+
+--------------------------- Security autoconfiguration information ------------------------------
+
+Authentication and authorization are enabled.
+TLS for the transport and HTTP layers is enabled and configured.
+
+The generated password for the elastic built-in superuser is : <<암호화된 패스워드>>
+
+If this node should join an existing cluster, you can reconfigure this with
+'/usr/share/elasticsearch/bin/elasticsearch-reconfigure-node --enrollment-token <token-here>'
+after creating an enrollment token on your existing cluster.
+
+You can complete the following actions at any time:
+
+Reset the password of the elastic built-in superuser with
+'/usr/share/elasticsearch/bin/elasticsearch-reset-password -u elastic'.
+
+Generate an enrollment token for Kibana instances with
+ '/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana'.
+
+Generate an enrollment token for Elasticsearch nodes with
+'/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s node'.
+
+-------------------------------------------------------------------------------------------------
+
+     2-4. 설치 완료후 서비스 리로드, 시스템 부팅시 자동으로 서비스 시작,  서비스 시작 
+	sudo systemctl daemon-reload
+ 	sudo systemctl enable elasticsearch	//시스템 부팅시 자동으로 서비스 시작
+	sudo systemctl start elasticsearch	// 서비스 시작 
+	sudo systemctl status elasticsearch	// 서비스 상태 확인 
+
+// 키바나 설치 
+	https://www.elastic.co/guide/en/kibana/current/deb.html
+     
+     2-5. Import the Elastic PGP key : 
+	wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+
+     2-6. 
+	sudo apt-get update
+	sudo apt-get install apt-transport-https
+
+      2-7. 
+	echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list
+
+      2-8 키바나 설치 
+	sudo apt-get update && sudo apt-get install kibana
+
+      2-9 Start Elasticsearch and generate an enrollment token for Kibana   : 키바나 작동을 위한  Elasticsearch token 생성 
+	/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
+	<출력된 토큰 복사> 
+
+      2-10 키바나 서비스 시작, 자동 시작 
+	sudo systemctl daemon-reload
+ 	sudo systemctl enable kibana		//시스템 부팅시 자동으로 서비스 시작
+	sudo systemctl start kibana		// 서비스 시작 
+	sudo systemctl status kibana		// 서비스 상태 확인 
+		http://localhost:5601/?code=307848
+
+      
+      2-11 원격에서 접근 허용 : 
+	vi /etc/kibana/kibana.yml
+		 11  server.host: "192.168.15.40"     <=== 수정  11  #server.host: "localhost"
+	sudo systemctl restart kibana
+
+       2-12 키바나 구성 : windev 에서 웹브라우져 에서 확인 
+	https://192.168.15.40:5601/?code=307848
+		http://localhost:5601/?code=307848
+
+           2-9번에서 출력한 enrollment token for Kibana 입력 
+	// 확인 코드 입력 
+	sudo systemctl status  	//제일 아랫라인에서 확인 
+	
+	
+
+
+
+==============================================================================================================================
+  3. Linux Docker (Ubuntu 22.04)		<== 운영 환경   ( 8.13.1 ) 
+     ELK-Stack2(Docker)   192.168.15.50	매핑포트(포트포워딩) : 22050
+
+     //컴퓨터 이름변경 : sudo cat /etc/hostname 			sudo vi /etc/hostname
+     // IP 변경        : sudo cat /etc/netplan/00-installer-config.yaml	sudo vi /etc/netplan/00-installer-config.yaml
+     // 리부팅         : sudo reboot       or    sudo init 6
+
+
+
+
+
+
+
 
 
 
