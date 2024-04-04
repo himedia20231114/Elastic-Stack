@@ -1,0 +1,65 @@
+이벤트 뷰어 
+  eventvwr.msc
+
+// Elastic Stack 설치 7.10.1,   8.1.3 (최신 버젼) 
+  
+   https://www.elastic.co/    <== 공식 사이트 
+   https://www.elastic.co/kr/downloads   <== 모든 제품, 모든 버젼 다운로드 
+
+   https://www.elastic.co/kr/support/matrix	<== 모든 버젼의 설치 가능한 OS 버젼을 확인 , 매트릭스 
+   
+
+	Elasticsearch	: 9200 포트사용
+	Kibana		: 5601 포트사용
+	
+  1. Windows 10 		<== 테스트/실습 ( 7.10 ) 
+	파일명 :  elasticsearch-7.10.1-windows-x86_64.zip   ==> elasticsearch-7.zip
+		 kibana-7.10.1-windows-x86_64.zip	   ==> kibana-7.zip
+
+     명령프롬프트 (관리자 권한으로 실행) 
+     - elasticsearch-7 설치 ,    9200 포트 사용 
+	// 압축 풀린 폴더 이동후 
+	C:\elasticsearch7>.\bin\elasticsearch.bat		<== 창은 종료하면 안됨
+
+	// 명령 프롬프트 창을 하나더 띄운 다음 실행 : 
+	curl -X GET "localhost:9200/?pretty"
+
+=========아래 내용 잘 출력 되면 정상 작동 ========================
+{
+  "name" : "DESKTOP-VI3SD85",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "F5UaffBBQIWbeQBurkEOcw",
+  "version" : {
+    "number" : "7.10.1",
+    "build_flavor" : "default",
+    "build_type" : "zip",
+    "build_hash" : "1c34507e66d7db1211f66f3513706fdf548736aa",
+    "build_date" : "2020-12-05T01:00:33.671820Z",
+    "build_snapshot" : false,
+    "lucene_version" : "8.7.0",
+    "minimum_wire_compatibility_version" : "6.8.0",
+    "minimum_index_compatibility_version" : "6.0.0-beta1"
+  },
+  "tagline" : "You Know, for Search"
+}
+==========================================================================	
+	
+	//Kibana 실행   <== 
+	C:\kibana7>.\bin\kibana.bat
+
+	   // 웹브라우져 : http://localhost:5601	<== 키바나 관리툴 접속 
+
+	// 라이센스 업데이트 : 30일 동안 무료로 사용할수 있도록 적용 
+	Management => Stack Management => License management => 30 Days Tiral (클릭) 
+
+	//Elastic 에서 제공 해주는 Sample Data Import 
+	Home => Try our sample data (클릭) 
+
+
+
+ 
+  2. Linux (Ubuntu 22.04)   <== 운영 환경   ( 8.13 )
+  3. Linux Docker 		<== 운영 환경   ( 8.13 ) 
+
+
+
