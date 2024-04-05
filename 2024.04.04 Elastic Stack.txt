@@ -61,6 +61,7 @@
 		apt, apt-get 을 사용 해서 설치 
 
      ELK-Stack1         192.168.15.40	매핑포트(포트포워딩) : 22040
+     ELK-Stack3	       192.168.15.60	매핑포트(포트포워딩) : 22040
 
      //컴퓨터 이름변경 : sudo cat /etc/hostname 			sudo vi /etc/hostname
      // IP 변경        : sudo cat /etc/netplan/00-installer-config.yaml	sudo vi /etc/netplan/00-installer-config.yaml
@@ -73,12 +74,12 @@
 	wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
 
      2-2 Installing from the APT repository :  Elastic 가 저장된 레파지토리 등록
-	apt update
+	apt-get update
 	sudo apt-get install apt-transport-https
 	echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list
 
      2-3 Elastic Search 설치 
-	sudo apt-get update && sudo apt-get install elasticsearch
+	sudo apt-get install elasticsearch
 
         <중요> 출력 내용 확인 : elastic  <== ID,  password 적어두어야함. 
 
@@ -149,7 +150,7 @@ Generate an enrollment token for Elasticsearch nodes with
 	https://192.168.15.40:5601/?code=307848
 		http://localhost:5601/?code=307848
 
-           2-9번에서 출력한 enrollment token for Kibana 입력 
+        // 2-9번에서 출력한 enrollment token for Kibana 입력 
 	// 확인 코드 입력 
 	sudo systemctl status  	//제일 아랫라인에서 확인 
 	
