@@ -351,6 +351,16 @@ PUT index2/_doc/3
 # 도규먼트의 모든 내용 출력 하기 
 GET index2/_search
 
+# 샘플 데이터의 내용을 출력해 보기 
+GET _cat/indices
+
+# index (테이블의 자료형)  정보를 확인 
+GET kibana_sample_data_ecommerce
+
+# index 의 Document 의 값을 확인 
+GET kibana_sample_data_ecommerce/_search
+
+GET kibana_sample_data_flights/_search
 
 
 
