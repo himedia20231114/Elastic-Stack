@@ -2,6 +2,8 @@
   eventvwr.msc
 
 // Elastic Stack 설치 7.10.1,   8.13.1 (최신 버젼) 
+
+   https://esbook.kimjmin.net/		<== 한글 버젼 공부 할 수 있는 사이트 
   
    https://www.elastic.co/    <== 공식 사이트 
    https://www.elastic.co/kr/downloads   <== 모든 제품, 모든 버젼 다운로드 
@@ -159,7 +161,15 @@ Generate an enrollment token for Elasticsearch nodes with
 	// 확인 코드 입력 
 	sudo systemctl status  	//제일 아랫라인에서 확인 
 	
-	
+	로그인 ID : elastic 
+
+        2-13 라이센스 등록 : 30일동안 무료 사용 
+		Management => Stack Management  ==> License management => 30Days 
+
+        2-14 elastic 계정의 패스워드 변경 : Pa$$w0rd
+		Management => Stack Management ==> Security => Users
+
+
 
 
 
@@ -170,6 +180,108 @@ Generate an enrollment token for Elasticsearch nodes with
      //컴퓨터 이름변경 : sudo cat /etc/hostname 			sudo vi /etc/hostname
      // IP 변경        : sudo cat /etc/netplan/00-installer-config.yaml	sudo vi /etc/netplan/00-installer-config.yaml
      // 리부팅         : sudo reboot       or    sudo init 6
+
+
+//도커 설치 
+    //도커 설치 
+    
+# Add Docker's official GPG key:    <== 도커를 설치하기위한 인증키 셋팅  
+  sudo apt-get update
+  sudo apt-get install ca-certificates curl
+  sudo install -m 0755 -d /etc/apt/keyrings
+  sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+  sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+# Add the repository to Apt sources:   < == 도커를 다운받을 레파지토리 업데이트 
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+
+
+// 도커 설치 
+	sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+	// 작동 확인
+	docker -v 
+	sudo docker run hello-world
+	docker                        // 명령어 메뉴얼 잘 출력 
+	sudo systemctl status docker 
+
+	// 설치 완료후 작업 : 특정 사용자 계정에게 도커를 사용할 수 있도록 권한 부여 
+
+	sudo groupadd docker
+	sudo usermod -aG docker $USER
+
+	// Security Issues 
+	sudo chmod 666 /var/run/docker.sock 				or sudo chown root:docker /var/run/docker.sock
+
+	// 확인 
+	sudo cat /etc/group 
+   	// docker 그룹에 user1   계정이 포함. 
+
+
+//엘라스틱 서치(ElasticSearch 8.13), 키바나(Kibana 8.13)   설치 , 두개의 컨테이너가 동일한 도커 네트워크에 있어야 통신   
+	- 도커 컴포즈를 사용해서 여러개의 컨테이너를 작동 할때는 동일한 도커 네트워크에 있음. 
+
+	// 컨테이너와 컨테이너 사이에 통신이 가능 하도록 할려면 동일한 도커 네트워크에 존재해야 함. 
+	// ElasticSearch 컨테이너 작동 
+	docker network create elastic
+	docker pull docker.elastic.co/elasticsearch/elasticsearch:8.13.1
+	docker run --name es01 --net elastic -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -t docker.elastic.co/elasticsearch/elasticsearch:8.13.1
+
+	// 환경변수 ELASTIC_PASSWORD 에 elastic 계정의 암호 저장 
+	export ELASTIC_PASSWORD="your_password"
+
+	// 컨테이너 내부의 인증서를 현재 폴더에 복사 
+	docker cp es01:/usr/share/elasticsearch/config/certs/http_ca.crt .
+
+	// https://localhost:9200 포트에 RestFull API 요청 성공, 인증서와  elastic 계정과 패스워드로 요청 성공    
+	curl --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200
+
+----------------------------------출력 성공 -----------------------------------------------
+{
+  "name" : "393df87bb619",
+  "cluster_name" : "docker-cluster",
+  "cluster_uuid" : "Jp6bXnEET7azYtHB0v41Uw",
+  "version" : {
+    "number" : "8.13.1",
+    "build_flavor" : "default",
+    "build_type" : "docker",
+    "build_hash" : "9287f29bba5e270bd51d557b8daccb7d118ba247",
+    "build_date" : "2024-03-29T10:05:29.787251984Z",
+    "build_snapshot" : false,
+    "lucene_version" : "9.10.0",
+    "minimum_wire_compatibility_version" : "7.17.0",
+    "minimum_index_compatibility_version" : "7.0.0"
+  },
+  "tagline" : "You Know, for Search"
+}
+-------------------------------------------------------------------------------------------------------
+
+        // 키바나(Kibana ) 설치 : 192.168.15.50:5601     <=== 키바나 관리자 접속 , 원격에서 바로 접속     
+
+	docker pull docker.elastic.co/kibana/kibana:8.13.1
+	docker run --name kibana --net elastic -p 5601:5601 docker.elastic.co/kibana/kibana:8.13.1
+
+	// 컨테이너의 접속 해서 관리 <== kibana 컨테이너에 접속
+	docker ps -a 
+	docker exec -it <컨테이너 ID> /bin/bash 	// 컨테이너에 접속 
+
+	exit      				// 컨테이너를 빠져나옴. 
+
+	// 키바나 설정 (windev) 
+	http://192.168.15.50:5601
+
+
+====================================================================================	
+
+
+
+
 
 
 
