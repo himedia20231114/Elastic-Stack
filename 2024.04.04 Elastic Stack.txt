@@ -115,6 +115,9 @@ Generate an enrollment token for Elasticsearch nodes with
 
 // 키바나 설치 
 	https://www.elastic.co/guide/en/kibana/current/deb.html
+
+    
+    ======2-5 ~ 2-7 까지 같은 내용 : ElasticSearch 와 다른 시스템에 설치할경우에만 실행 ======================
      
      2-5. Import the Elastic PGP key : 
 	wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
@@ -126,8 +129,10 @@ Generate an enrollment token for Elasticsearch nodes with
       2-7. 
 	echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list
 
+      ==========================================================================================================
+
       2-8 키바나 설치 
-	sudo apt-get update && sudo apt-get install kibana
+	sudo apt-get install kibana
 
       2-9 Start Elasticsearch and generate an enrollment token for Kibana   : 키바나 작동을 위한  Elasticsearch token 생성 
 	/usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s kibana
