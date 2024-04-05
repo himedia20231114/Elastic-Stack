@@ -278,6 +278,79 @@ sudo apt-get update
 
 
 ====================================================================================	
+# Elastic DSL 기본 구문 익히기 : JSON 데이터를 쿼리 하는 구문
+   
+
+GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+# Elastic DSL : JSON 데이터를 쿼리 하는 구문 
+
+# GET : Select 
+# POST : Insert 
+# PUT  : Update 
+# DELETE : Delete 
+
+# _cat : 전체적인 정보를 출력 
+
+GET _cat
+# 샤드 정보 출력 
+GET _cat/shards
+# Index 정보를 출력 
+GET _cat/indices
+
+# 용어 정리 
+# =================================
+#  DBMS          엘라틱 서치 
+# ================================= 
+#  테이블         인덱스 
+#  레코드         도규먼트 
+#  컬럼           필드 
+#  스키마         매핑 
+# =================================
+
+# 인덱스 생성/ 확인  / 삭제 
+PUT index1 
+
+GET index1 
+
+# index 정보를 출력 한다. 테이블 정보를 출력 
+GET _cat/indices
+
+DELETE index1
+
+# 도규먼트 생성 
+PUT index2/_doc/1
+{
+  "name": "홍길동", 
+  "age": 30 , 
+  "gender": "Man"
+}
+
+# 인덱스 정보 확인 
+GET index2 
+
+# 도규먼트 생성 
+PUT index2/_doc/2
+{
+  "name" : "이순신", 
+  "contry": "kor"
+}
+
+PUT index2/_doc/3 
+{
+  "name" : "강감찬", 
+  "age"  : "20", 
+  "contry" : "kor"
+}
+
+# 도규먼트의 모든 내용 출력 하기 
+GET index2/_search
+
 
 
 
