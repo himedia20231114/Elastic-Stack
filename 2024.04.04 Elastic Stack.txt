@@ -488,19 +488,100 @@ filter {
 
 }
 
-
-
-
-
 output {
   elasticsearch {
     hosts => ["http://localhost:9200"]
-    index => "tmdb_5000_movies3"
+    index => "tmdb_5000_movies4"
     #user => "elastic"
     #password => "changeme"
   }
 }
 ======================================================================
+    step 9 : C:\logstash7>.\bin\logstash.bat -f .\config\logstash-dmdb4.conf
+    step 10 : 키바나 콘솔에서  확인 ; 
+    		GET _cat/indices				// tmdb_5000_movies4 출력
+		GET tmdb_5000_movies4/_search		// 4700개 값을 출력
+		GET tmdb_5000_movies4			// 컬럼의 자료형(스키마, 매핑) 을 확인 
+
+
+// index 템프릿을 적용해서 매핑 함 , 
+    step 11 : https://github.com/himedia20231114/Elastic-Stack/blob/main/TMDB_5000_Movies_Script/06/template_tmdb
+	-- kibana console 에서 실행 
+===========================================================
+PUT _index_template/tmdb
+{
+  "index_patterns": "tmdb_5000_movie*",
+  "priority": 1,
+  "template": {
+    "mappings": {
+        "properties": {
+        "budget": { "type": "double" },
+        "popularity" : { "type": "double" },
+        "vote_average" : { "type": "double" },
+        "vote_count" : { "type": "double" },
+        "id" : { "type": "long" },
+        "revenue" : { "type": "long" },
+        "runtime" : { "type": "long" },
+        "genres" : { "type": "keyword" },
+        "original_language" : { "type": "keyword" },
+        "status" : { "type": "keyword" },
+        "homepage" : { "type": "text" },
+        "original_title" : { "type": "text" },
+        "overview" : { "type": "text" },
+        "tagline" : { "type": "text" },
+        "title" : { "type": "text" },
+        "release_date" : { "type": "date", "format" : "iso8601" }
+      }
+    }
+  }
+}
+
+===========================================================
+
+
+    step 12 : C:\logstash7\config\logstash-dmdb5.conf
+==================================================================
+input {
+  file {
+    path => "C:/example/tmdb_5000_movies.csv"
+    start_position => "beginning"
+    sincedb_path => "nul"
+  }
+}
+
+
+filter {
+  csv {
+    separator => ","
+    columns => ["budget","genres","homepage","id","keywords","original_language",
+    "original_title","overview","popularity","production_companies","production_countries",
+    "_release_date","revenue","runtime","spoken_languages","status","tagline",
+    "title","vote_average","vote_count"]
+    remove_field => ["message", "production_companies", "production_countries",
+    "keywords", "spoken_languages", "@timestamp", "path", "@version", "host"]
+    skip_header => true
+  }
+ date {
+    match => ["_release_date", "YYYY-MM-dd"]
+    target => "release_date"
+    timezone => "UTC"
+    remove_field => "_release_date"
+  }
+
+}
+
+output {
+  elasticsearch {
+    hosts => ["http://localhost:9200"]
+    index => "tmdb_5000_movies5"
+    #user => "elastic"
+    #password => "changeme"
+  }
+}
+
+
+==================================================================
+    step 13 : C:\logstash7>.\bin\logstash.bat -f .\config\logstash-dmdb5.conf
 
 
 
