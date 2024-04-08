@@ -452,7 +452,57 @@ output {
 }
 =========================================================================
     step 6 : C:\logstash7>.\bin\logstash.bat -f .\config\logstash-dmdb3.conf
-    
+    step 7 : 키바나 콘솔에서  확인 ; 
+    		GET _cat/indices
+		GET tmdb_5000_movies3/_search
+
+// 로그스테시에서 C:/example/tmdb_5000_movies.csv 파일을 읽어서 전처리 작업(filter) 을 후 ElasticSearch 로 전송 tmdb_5000_movies3
+    step 8 : C:\logstash7>.\bin\logstash.bat -f .\config\logstash-dmdb4.conf
+======================================================================
+input {
+  file {
+    path => "C:/example/tmdb_5000_movies.csv"
+    start_position => "beginning"
+    sincedb_path => "nul"
+  }
+}
+
+
+filter {
+  csv {
+    separator => ","
+    columns => ["budget","genres","homepage","id","keywords","original_language",
+    "original_title","overview","popularity","production_companies","production_countries",
+    "_release_date","revenue","runtime","spoken_languages","status","tagline",
+    "title","vote_average","vote_count"]
+    remove_field => ["message", "production_companies", "production_countries",
+    "keywords", "spoken_languages", "@timestamp", "path", "@version", "host"]
+    skip_header => true
+  }
+ date {
+    match => ["_release_date", "YYYY-MM-dd"]
+    target => "release_date"
+    timezone => "UTC"
+    remove_field => "_release_date"
+  }
+
+}
+
+
+
+
+
+output {
+  elasticsearch {
+    hosts => ["http://localhost:9200"]
+    index => "tmdb_5000_movies3"
+    #user => "elastic"
+    #password => "changeme"
+  }
+}
+======================================================================
+
+
 
 
 
