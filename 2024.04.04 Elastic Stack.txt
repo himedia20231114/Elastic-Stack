@@ -585,9 +585,106 @@ output {
 
 
 
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+1. ElasticSearch 가 실행 
+	C:\elasticsearch7\bin>.\elasticsearch.bat
+
+2. Kibana 실행 
+	C:\kibana7>.\bin\kibana.bat
+	브라우져에서 실행 : http://localhost:5601
+
+3. logstach 실행
+
+C:\logstash7\config\logstash-dmdb6.conf
+============================================================
+input {
+  file {
+    path => "C:/example/tmdb_5000_movies.csv"
+    start_position => "beginning"
+    sincedb_path => "nul"
+  }
+}
 
 
-5. 키바나 데시보드를 사용해서 필요한 정보을 읽어와서 그래프 
+filter {
+  csv {
+    separator => ","
+    columns => ["budget","genres","homepage","id","keywords","original_language",
+    "original_title","overview","popularity","production_companies","production_countries",
+    "_release_date","revenue","runtime","spoken_languages","status","tagline",
+    "title","vote_average","vote_count"]
+    remove_field => ["message", "production_companies", "production_countries",
+    "keywords", "spoken_languages", "@timestamp", "path", "@version", "host"]
+    skip_header => true
+  }
+ date {
+    match => ["_release_date", "YYYY-MM-dd"]
+    target => "release_date"
+    timezone => "UTC"
+    remove_field => "_release_date"
+  }
+
+}
+
+output {
+  elasticsearch {
+    hosts => ["http://localhost:9200"]
+    index => "tmdb_5000_movies6"
+    #user => "elastic"
+    #password => "changeme"
+  }
+}
+============================================================
+
+
+C:\logstash7>.\bin\logstash.bat -f .\config\logstash-dmdb6.conf 
+
+  // 키바나 콘솔에서 index 가 잘 저장 되었는지 확인 
+======================================================
+#  index 정보를 출력 
+
+GET _cat/indices
+
+# 스키마 (매핑) : 각 컬럼의 자료형 
+GET tmdb_5000_movies6
+
+# index (테이블) 의 값을 출력 
+GET tmdb_5000_movies6/_search
+=======================================================
+
+키바나에서 Index pattern 생성    <=== 키바나에서 사용 
+   index 	: ElasticSearch 에서 index (테이블,값) 
+	tmdb_5000_movies6
+   index pattern   : Kabana 에서 index 에 대한 Index Pattern ,    <== index (테이블) 의 색인 (index) 
+	- 생성 : Stack Management => Index patterns => Create index pattern 
+		주의 : Time Field 를 반드시 지정, date 타입이 있는 필드 
+		
+
+
+ 
+4. filebeat  실행 
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+5. 키바나 Discover 를 사용해서 필요한 정보을 필터 해서 읽어옮 
+
+6. 키바나의 Visualize를 사용해서 그래프로 시작화 <== 패턴 
+    // 지난 10년동안 어떤 영화 장르가 많이 생성되었는지 ? 
+	a
+
+    // 할리우드 영화 중에 평점이 높은 영화는 어느정도 수익이 났는지 ? 
+	막대 그래프 
+
+
+
+7. 키바나의 Dashboards를 해서 시각화한 패턴의 묶음. 
+
+	원본파일 (csv, log,...) ===> Logstash (전처리, JSON ) ,  (index Template 생성)==> ElasticSearch (index) ==> Kibana (index pattern) ==> 
+		Kibana Visualize (시각화) , 패턴  ==> Kibana Dashboards
+
+
+http://himedia.atosoft.kr/jr.asp
+   엘라스틱 서치 데이터 시각화 
 
  
 
